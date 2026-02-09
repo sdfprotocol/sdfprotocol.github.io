@@ -1,0 +1,149 @@
+---
+title: Content Negotiation
+description: "Resolution levels, Accept headers, consumer profiles, and the extension mechanism for SDF documents."
+---
+
+import { Code, Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Resolution levels
+
+SDF documents support three resolution levels. Consumers specify the desired resolution via the `Accept` header or query parameter.
+
+| Level | Description | Typical size | Use case |
+|-------|-------------|-------------|----------|
+| `compact` | Header + summary + type_data only | ~300 tokens | Indexing, triage, catalog display |
+| `standard` | All core fields (entities, claims, relationships, type_data) | ~750 tokens | General agent consumption |
+| `full` | All fields including sections, links, embeddings, extensions | ~2,000 tokens | Deep analysis, archival |
+
+### Compact
+
+The compact resolution includes only the fields needed for quick classification and display:
+
+```json
+{
+  "sdf_version": "0.2.0",
+  "id": "sdf_abc123",
+  "parent_type": "article",
+  "type": "article.news",
+  "summary": {
+    "one_line": "EU passes AI regulation framework."
+  },
+  "type_data": {
+    "authors": ["Maria Schmidt"],
+    "publish_date": "2025-03-15"
+  },
+  "provenance": {
+    "content_hash": "sha256:8a3b1c..."
+  }
+}
+```
+
+### Standard
+
+The standard resolution includes all semantically extracted fields:
+
+- `source`, `summary`, `entities`, `claims`, `topics`, `relationships`, `type_data`, `provenance`
+
+This is the default resolution level.
+
+### Full
+
+The full resolution adds structural and supplementary data:
+
+- Everything in standard, plus: `sections`, `metadata`, `temporal`, `links`, `embeddings`, `extensions`
+
+## Accept header
+
+Clients request SDF documents using the `application/sdf+json` media type:
+
+```http
+Accept: application/sdf+json
+```
+
+Resolution is specified via the `resolution` parameter:
+
+<Tabs>
+  <TabItem label="Compact">
+    ```http
+    Accept: application/sdf+json; resolution=compact
+    ```
+  </TabItem>
+  <TabItem label="Standard">
+    ```http
+    Accept: application/sdf+json; resolution=standard
+    ```
+  </TabItem>
+  <TabItem label="Full">
+    ```http
+    Accept: application/sdf+json; resolution=full
+    ```
+  </TabItem>
+</Tabs>
+
+If no resolution parameter is provided, servers should return `standard` resolution.
+
+## Consumer profiles
+
+Consumer profiles allow agents to declare their capabilities and preferences in a structured way:
+
+```http
+Accept: application/sdf+json; resolution=standard; profile="agent-v1"
+```
+
+Profiles are defined by the consumer and can be registered with the publisher via the well-known configuration. A profile might specify:
+
+- Preferred resolution level
+- Required fields beyond the resolution default
+- Maximum document size
+- Supported extension namespaces
+
+Publishers may use profiles to optimize document generation for known consumer classes.
+
+## Query parameter fallback
+
+For environments where header modification is not possible, resolution may also be specified via query parameter:
+
+```
+https://example.com/api/sdf/page?resolution=compact
+```
+
+The `Accept` header takes precedence when both are present.
+
+## Extension mechanism
+
+SDF documents support vendor-specific extensions via the `extensions` field. All extension keys must follow the `x-{vendor}` namespace convention:
+
+```json
+{
+  "extensions": {
+    "x-acme": {
+      "internal_id": "ACM-12345",
+      "department": "research",
+      "priority": "high"
+    },
+    "x-analytics": {
+      "pageviews_30d": 45230,
+      "engagement_score": 0.73
+    }
+  }
+}
+```
+
+### Extension rules
+
+1. All extension keys must be prefixed with `x-` followed by a vendor identifier
+2. Extension values can be any valid JSON value
+3. Extensions are only included at `full` resolution by default
+4. Consumers must not rely on extensions for core document interpretation
+5. Publishers should document their extension schemas separately
+6. Extension namespaces must not conflict with current or future SDF field names
+
+### Requesting specific extensions
+
+Consumers can request specific extensions at any resolution level:
+
+```http
+Accept: application/sdf+json; resolution=standard; extensions="x-acme,x-analytics"
+```
+
+This tells the server to include the specified extension namespaces even if the resolution level would not normally include them.

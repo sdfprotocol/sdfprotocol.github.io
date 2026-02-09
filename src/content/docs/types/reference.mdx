@@ -1,0 +1,86 @@
+---
+title: "reference"
+description: "SDF type reference for reference — encyclopedic and reference material. Subtypes: encyclopedia, dictionary, legal, academic, specification, wiki."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Overview
+
+The `reference` parent type covers encyclopedic, definitional, and authoritative reference material. This includes encyclopedia articles, dictionary entries, legal documents, academic papers, technical specifications, and wiki content.
+
+## Subtypes
+
+| Subtype | Qualified Type | Description |
+|---------|---------------|-------------|
+| `encyclopedia` | `reference.encyclopedia` | Encyclopedia articles (e.g., Wikipedia) |
+| `dictionary` | `reference.dictionary` | Dictionary or glossary entries |
+| `legal` | `reference.legal` | Legal documents, statutes, regulations |
+| `academic` | `reference.academic` | Academic papers and journal articles |
+| `specification` | `reference.specification` | Technical specifications and standards |
+| `wiki` | `reference.wiki` | Wiki content (non-encyclopedic) |
+
+## type_data fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `subject` | `string` | Yes | Primary subject of the reference material |
+| `domain` | `string` | No | Knowledge domain (e.g., "computer science", "law") |
+| `classification` | `string` | No | Subject classification code (e.g., Dewey, LoC) |
+| `definitions` | `array<object>` | No | Definitions provided in the content |
+| `cross_references` | `array<object>` | No | Links to related reference material |
+
+## Example type_data
+
+<Code code={`{
+  "type_data": {
+    "subject": "Transmission Control Protocol",
+    "domain": "computer networking",
+    "classification": "QA76.9.T7",
+    "definitions": [
+      {
+        "term": "TCP",
+        "definition": "A connection-oriented transport layer protocol that provides reliable, ordered, and error-checked delivery of a stream of bytes between applications."
+      },
+      {
+        "term": "three-way handshake",
+        "definition": "The process by which a TCP connection is established: SYN, SYN-ACK, ACK."
+      }
+    ],
+    "cross_references": [
+      {
+        "title": "Internet Protocol",
+        "relationship": "related",
+        "url": "https://en.wikipedia.org/wiki/Internet_Protocol"
+      },
+      {
+        "title": "RFC 9293",
+        "relationship": "specification",
+        "url": "https://www.rfc-editor.org/rfc/rfc9293"
+      }
+    ]
+  }
+}`} lang="json" title="reference type_data" />
+
+## Definition schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `term` | `string` | The term being defined |
+| `definition` | `string` | The definition text |
+
+## Cross-reference schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `title` | `string` | Title of the referenced material |
+| `relationship` | `string` | Relationship type (related, specification, see_also, parent, child) |
+| `url` | `string` | URL of the referenced material |
+
+## Notes
+
+- `subject` should be the canonical name of the subject, not the page title.
+- `domain` is a free-text knowledge domain, not an SDF type.
+- `classification` supports any standard classification system. Include the system prefix if ambiguous.
+- `definitions` captures explicit definitions found in the content, not all possible definitions of terms.
+- For academic papers with specific citation metadata, the `entities` field should include authors as `person` entities with `role: "author"`.

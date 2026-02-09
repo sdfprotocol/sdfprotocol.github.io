@@ -1,0 +1,16 @@
+:root {
+  --sl-font: "Inter", system-ui, sans-serif;
+  --sl-font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+table {
+  font-size: 0.9rem;
+}
+
+pre {
+  border-radius: 0.5rem;
+}
+
+.hero {
+  padding-block: 2rem;
+}

@@ -1,0 +1,102 @@
+---
+title: "commerce"
+description: "SDF type reference for commerce — product and service listings. Subtypes: product, category, comparison, marketplace, service, pricing."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Overview
+
+The `commerce` parent type covers product listings, service pages, pricing tables, category pages, and comparison content. It captures structured product data that agents can use for price comparison, availability checking, and purchase decision support.
+
+## Subtypes
+
+| Subtype | Qualified Type | Description |
+|---------|---------------|-------------|
+| `product` | `commerce.product` | Individual product listing |
+| `category` | `commerce.category` | Product category or collection page |
+| `comparison` | `commerce.comparison` | Product or service comparison |
+| `marketplace` | `commerce.marketplace` | Marketplace listing (multi-seller) |
+| `service` | `commerce.service` | Service offering description |
+| `pricing` | `commerce.pricing` | Pricing page or table |
+
+## type_data fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `product_name` | `string` | Yes | Product or service name |
+| `price` | `number` | No | Price value |
+| `currency` | `string` | No | ISO 4217 currency code (e.g., "USD") |
+| `availability` | `string` | No | Stock status ("in_stock", "out_of_stock", "preorder", "limited") |
+| `brand` | `string` | No | Brand or manufacturer name |
+| `sku` | `string` | No | Stock keeping unit or product identifier |
+| `ratings` | `object` | No | Rating information |
+| `specifications` | `array<object>` | No | Product specifications |
+| `shipping` | `object` | No | Shipping information |
+
+## Example type_data
+
+<Code code={`{
+  "type_data": {
+    "product_name": "MacBook Pro 16-inch (M4 Max)",
+    "price": 3499.00,
+    "currency": "USD",
+    "availability": "in_stock",
+    "brand": "Apple",
+    "sku": "MYW83LL/A",
+    "ratings": {
+      "average": 4.7,
+      "count": 1243,
+      "distribution": {
+        "5": 892,
+        "4": 231,
+        "3": 78,
+        "2": 28,
+        "1": 14
+      }
+    },
+    "specifications": [
+      { "name": "Processor", "value": "Apple M4 Max" },
+      { "name": "Memory", "value": "48 GB" },
+      { "name": "Storage", "value": "1 TB SSD" },
+      { "name": "Display", "value": "16.2-inch Liquid Retina XDR" },
+      { "name": "Battery", "value": "Up to 24 hours" }
+    ],
+    "shipping": {
+      "free_shipping": true,
+      "estimated_days": 3,
+      "methods": ["standard", "express"]
+    }
+  }
+}`} lang="json" title="commerce type_data" />
+
+## Ratings schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `average` | `number` | Average rating (typically 1-5 scale) |
+| `count` | `integer` | Total number of ratings |
+| `distribution` | `object` | Count per rating level |
+
+## Specification schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `string` | Specification label |
+| `value` | `string` | Specification value |
+
+## Shipping schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `free_shipping` | `boolean` | Whether free shipping is available |
+| `estimated_days` | `integer` | Estimated delivery time in days |
+| `methods` | `array<string>` | Available shipping methods |
+
+## Notes
+
+- `price` is a numeric value, not a formatted string. Currency formatting is the consumer's responsibility.
+- `currency` uses ISO 4217 codes. If not specified, consumers should not assume a currency.
+- `availability` is normalized to one of: `in_stock`, `out_of_stock`, `preorder`, `limited`.
+- For comparison pages (`commerce.comparison`), `specifications` may include fields from multiple products.
+- Product reviews should use `article.review` with `aspects: ["commerce.product"]`.

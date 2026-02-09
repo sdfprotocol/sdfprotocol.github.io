@@ -1,0 +1,53 @@
+---
+title: "discussion"
+description: "SDF type reference for discussion — community Q&A and forum content. Subtypes: forum, qa, comment_thread, review_thread, poll."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Overview
+
+The `discussion` parent type covers community-generated content including forums, Q&A platforms, comment threads, review threads, and polls. This type captures the conversational structure and resolution state that agents need for question-answering tasks.
+
+## Subtypes
+
+| Subtype | Qualified Type | Description |
+|---------|---------------|-------------|
+| `forum` | `discussion.forum` | Forum thread or discussion |
+| `qa` | `discussion.qa` | Question-and-answer format (e.g., Stack Overflow) |
+| `comment_thread` | `discussion.comment_thread` | Comment thread on an article or post |
+| `review_thread` | `discussion.review_thread` | User review collection |
+| `poll` | `discussion.poll` | Poll or survey with results |
+
+## type_data fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `question_title` | `string` | Yes | Title of the question or discussion topic |
+| `answer_count` | `integer` | No | Number of answers or replies |
+| `accepted_answer` | `string` | No | Text of the accepted or best answer |
+| `votes` | `integer` | No | Vote count (upvotes minus downvotes) |
+| `tags` | `array<string>` | No | Topic tags applied to the discussion |
+| `is_resolved` | `boolean` | No | Whether the question or issue is resolved |
+
+## Example type_data
+
+<Code code={`{
+  "type_data": {
+    "question_title": "How to handle concurrent database migrations in a distributed system?",
+    "answer_count": 7,
+    "accepted_answer": "Use advisory locks at the migration runner level. Each instance attempts to acquire a PostgreSQL advisory lock before running migrations. Only the instance that holds the lock proceeds; others wait or skip. This ensures exactly-once execution without requiring external coordination.",
+    "votes": 142,
+    "tags": ["postgresql", "distributed-systems", "database-migrations", "concurrency"],
+    "is_resolved": true
+  }
+}`} lang="json" title="discussion type_data" />
+
+## Notes
+
+- `question_title` is the thread title or question, not a summary. Use `summary.one_line` for a generated summary.
+- `accepted_answer` contains the text of the accepted answer, not the full answer object. The full answer structure is in `sections`.
+- `votes` is a net score (upvotes minus downvotes). Negative values are valid.
+- `is_resolved` indicates whether the original question has been answered to the asker's satisfaction. For forums without explicit resolution, this field may be omitted.
+- `tags` are the platform-native tags, not SDF-generated topics. Use `topics` for SDF-classified topics.
+- For Q&A content that also serves as documentation (e.g., canonical Stack Overflow answers), use `aspects: ["documentation.faq"]`.

@@ -1,0 +1,165 @@
+---
+title: Well-Known Discovery
+description: "The /.well-known/sdf.json endpoint for SDF publisher discovery and configuration."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Overview
+
+Publishers that serve SDF documents advertise their support via a well-known endpoint:
+
+```
+https://example.com/.well-known/sdf.json
+```
+
+This allows agents to discover SDF support, locate endpoints, and understand publisher policies without prior configuration.
+
+## Specification
+
+The well-known endpoint must:
+
+1. Be served at exactly `/.well-known/sdf.json`
+2. Return `Content-Type: application/json`
+3. Return HTTP 200 with a valid configuration object
+4. Be publicly accessible (no authentication required for discovery)
+
+## Configuration fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `sdf_version` | `string` | Yes | Supported SDF protocol version |
+| `publisher` | `object` | Yes | Publisher identity |
+| `endpoints` | `array<object>` | Yes | Available SDF endpoints |
+| `types_supported` | `array<string>` | No | Parent types this publisher serves |
+| `resolutions` | `array<string>` | No | Supported resolution levels |
+| `policies` | `object` | No | Publisher policies |
+| `extensions` | `array<string>` | No | Supported extension namespaces |
+
+### `publisher`
+
+```json
+{
+  "publisher": {
+    "name": "Example News",
+    "domain": "example.com",
+    "contact": "sdf@example.com"
+  }
+}
+```
+
+### `endpoints`
+
+Declare the available SDF endpoints and their capabilities:
+
+```json
+{
+  "endpoints": [
+    {
+      "path": "/api/sdf/{url}",
+      "method": "GET",
+      "description": "Convert any page on this domain to SDF",
+      "rate_limit": "100/hour",
+      "auth_required": false
+    },
+    {
+      "path": "/api/sdf/batch",
+      "method": "POST",
+      "description": "Batch conversion of multiple URLs",
+      "rate_limit": "10/hour",
+      "auth_required": true
+    }
+  ]
+}
+```
+
+### `policies`
+
+Publisher policies govern caching, authentication, and usage:
+
+```json
+{
+  "policies": {
+    "cache_ttl": 3600,
+    "require_auth": false,
+    "rate_limit": "100/hour",
+    "max_batch_size": 50,
+    "attribution_required": true,
+    "commercial_use": true
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `cache_ttl` | `integer` | Recommended cache TTL in seconds |
+| `require_auth` | `boolean` | Whether authentication is required for SDF endpoints |
+| `rate_limit` | `string` | Rate limit description |
+| `max_batch_size` | `integer` | Maximum URLs per batch request |
+| `attribution_required` | `boolean` | Whether consumers must attribute the source |
+| `commercial_use` | `boolean` | Whether commercial use is permitted |
+
+## Complete example
+
+<Code code={`{
+  "sdf_version": "0.2.0",
+  "publisher": {
+    "name": "Example News",
+    "domain": "example.com",
+    "contact": "sdf@example.com"
+  },
+  "endpoints": [
+    {
+      "path": "/api/sdf/{url}",
+      "method": "GET",
+      "description": "Convert any page on this domain to SDF",
+      "rate_limit": "100/hour",
+      "auth_required": false
+    },
+    {
+      "path": "/api/sdf/batch",
+      "method": "POST",
+      "description": "Batch conversion (authenticated)",
+      "rate_limit": "10/hour",
+      "auth_required": true
+    }
+  ],
+  "types_supported": [
+    "article",
+    "media",
+    "profile"
+  ],
+  "resolutions": [
+    "compact",
+    "standard",
+    "full"
+  ],
+  "policies": {
+    "cache_ttl": 3600,
+    "require_auth": false,
+    "rate_limit": "100/hour",
+    "max_batch_size": 50,
+    "attribution_required": true,
+    "commercial_use": true
+  },
+  "extensions": [
+    "x-example-analytics",
+    "x-example-internal"
+  ]
+}`} lang="json" title="/.well-known/sdf.json" />
+
+## Agent discovery flow
+
+1. Agent wants to consume `https://example.com/some-article`
+2. Agent fetches `https://example.com/.well-known/sdf.json`
+3. If 200: parse configuration, use declared endpoint to request SDF document
+4. If 404: publisher does not support SDF; agent must fall back to HTML extraction
+5. Agent respects declared policies (rate limits, authentication, attribution)
+
+## Caching
+
+Agents should cache the well-known configuration. Recommended behavior:
+
+- Cache for the `cache_ttl` specified in `policies`, or 1 hour if not specified
+- Re-fetch on HTTP 410 (Gone) to detect SDF support removal
+- Respect standard HTTP cache headers (`Cache-Control`, `ETag`) if present

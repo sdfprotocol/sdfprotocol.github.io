@@ -1,0 +1,143 @@
+---
+title: Type Taxonomy
+description: "Complete taxonomy of SDF parent types and subtypes — 10 parent types, 50+ subtypes, production statistics."
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Overview
+
+SDF classifies every document using a two-level hierarchy: `parent_type.subtype`. There are 10 parent types and 50+ subtypes covering the full range of web content.
+
+In production deployment across **2,335 documents**, **74 unique type combinations** were observed. The type normalization cascade corrected 63 non-canonical type inventions to achieve 100% taxonomy conformance.
+
+## Taxonomy tree
+
+```
+article
+├── news
+├── blog
+├── opinion
+├── review
+├── analysis
+└── press_release
+
+documentation
+├── tutorial
+├── api_reference
+├── guide
+├── faq
+├── changelog
+└── troubleshooting
+
+commerce
+├── product
+├── category
+├── comparison
+├── marketplace
+├── service
+└── pricing
+
+discussion
+├── forum
+├── qa
+├── comment_thread
+├── review_thread
+└── poll
+
+reference
+├── encyclopedia
+├── dictionary
+├── legal
+├── academic
+├── specification
+└── wiki
+
+data
+├── dataset
+├── statistics
+├── report
+├── dashboard
+├── financial
+└── scientific
+
+code
+├── repository
+├── package
+├── snippet
+├── gist
+├── notebook
+└── documentation
+
+profile
+├── person
+├── organization
+├── place
+├── product_profile
+└── portfolio
+
+event
+├── conference
+├── meetup
+├── webinar
+├── concert
+├── sports
+└── workshop
+
+media
+├── video
+├── podcast
+├── music
+├── image_gallery
+├── livestream
+└── animation
+```
+
+## Reference table
+
+| Parent Type | Subtypes | Description | type_data Reference |
+|------------|----------|-------------|-------------------|
+| `article` | news, blog, opinion, review, analysis, press_release | Authored content for publication | [article](/types/article/) |
+| `documentation` | tutorial, api_reference, guide, faq, changelog, troubleshooting | Technical / instructional content | [documentation](/types/documentation/) |
+| `commerce` | product, category, comparison, marketplace, service, pricing | Product and service listings | [commerce](/types/commerce/) |
+| `discussion` | forum, qa, comment_thread, review_thread, poll | Community Q&A and forums | [discussion](/types/discussion/) |
+| `reference` | encyclopedia, dictionary, legal, academic, specification, wiki | Encyclopedic and reference material | [reference](/types/reference/) |
+| `data` | dataset, statistics, report, dashboard, financial, scientific | Data-centric content | [data](/types/data/) |
+| `code` | repository, package, snippet, gist, notebook, documentation | Software and code content | [code](/types/code/) |
+| `profile` | person, organization, place, product_profile, portfolio | Entity profiles | [profile](/types/profile/) |
+| `event` | conference, meetup, webinar, concert, sports, workshop | Event listings and schedules | [event](/types/event/) |
+| `media` | video, podcast, music, image_gallery, livestream, animation | Audio/video/multimedia | [media](/types/media/) |
+
+## Production statistics
+
+From production deployment over 2,335 documents:
+
+| Metric | Value |
+|--------|-------|
+| Total documents processed | 2,335 |
+| Unique parent types observed | 10 (all) |
+| Unique type combinations observed | 74 |
+| Non-canonical types corrected | 63 |
+| Taxonomy conformance after normalization | 100% |
+
+The most frequently observed types in production:
+
+| Type | Count | Percentage |
+|------|-------|-----------|
+| `article.news` | 487 | 20.9% |
+| `article.blog` | 312 | 13.4% |
+| `documentation.guide` | 198 | 8.5% |
+| `commerce.product` | 176 | 7.5% |
+| `reference.wiki` | 154 | 6.6% |
+| `code.repository` | 143 | 6.1% |
+| `discussion.qa` | 128 | 5.5% |
+| Other types | 737 | 31.5% |
+
+<CardGrid>
+  <Card title="Type System Spec" icon="document">
+    See [Type System](/spec/type-system/) for the normalization cascade and aspect system.
+  </Card>
+  <Card title="Document Model" icon="list-format">
+    See [Document Model](/spec/document-model/) for how `type_data` fits into the document structure.
+  </Card>
+</CardGrid>

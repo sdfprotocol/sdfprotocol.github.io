@@ -1,0 +1,204 @@
+---
+title: SDF Document Schema
+description: "The root JSON Schema for SDF documents — required fields, type constraints, and structural validation."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Root schema
+
+The SDF document schema (`sdf-document.schema.json`) defines the structural requirements for all SDF documents. It is written in JSON Schema draft 2020-12.
+
+## Key parts
+
+### Schema header
+
+<Code code={`{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdfprotocol.org/schemas/sdf-document.schema.json",
+  "title": "SDF Document",
+  "description": "Schema for Structured Data Format (SDF) documents",
+  "type": "object"
+}`} lang="json" title="Schema header" />
+
+### Required fields
+
+<Code code={`{
+  "required": [
+    "sdf_version",
+    "id",
+    "parent_type",
+    "type",
+    "source",
+    "summary",
+    "entities",
+    "type_data",
+    "provenance"
+  ]
+}`} lang="json" title="Required fields" />
+
+### Field definitions
+
+<Code code={`{
+  "properties": {
+    "sdf_version": {
+      "type": "string",
+      "pattern": "^\\\\d+\\\\.\\\\d+\\\\.\\\\d+$",
+      "description": "SDF protocol version (semver)"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^sdf_",
+      "description": "Unique document identifier, prefixed with sdf_"
+    },
+    "parent_type": {
+      "type": "string",
+      "enum": [
+        "article",
+        "documentation",
+        "commerce",
+        "discussion",
+        "reference",
+        "data",
+        "code",
+        "profile",
+        "event",
+        "media"
+      ],
+      "description": "Primary content type classification"
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^(article|documentation|commerce|discussion|reference|data|code|profile|event|media)\\\\.",
+      "description": "Qualified type as parent_type.subtype"
+    },
+    "aspects": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Secondary type classifications for multi-type content"
+    },
+    "source": {
+      "$ref": "common/source.schema.json"
+    },
+    "summary": {
+      "$ref": "common/summary.schema.json"
+    },
+    "entities": {
+      "type": "array",
+      "items": { "$ref": "common/entity.schema.json" },
+      "description": "Extracted named entities"
+    },
+    "claims": {
+      "type": "array",
+      "items": { "$ref": "common/claim.schema.json" },
+      "description": "Factual assertions"
+    },
+    "topics": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Topic classification labels"
+    },
+    "relationships": {
+      "type": "array",
+      "items": { "$ref": "common/relationship.schema.json" },
+      "description": "Entity relationship triples"
+    },
+    "type_data": {
+      "type": "object",
+      "description": "Type-specific structured fields"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "heading": { "type": "string" },
+          "level": { "type": "integer", "minimum": 1, "maximum": 6 },
+          "content": { "type": "string" },
+          "word_count": { "type": "integer" }
+        }
+      },
+      "description": "Document structural sections"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Page-level metadata"
+    },
+    "provenance": {
+      "$ref": "common/provenance.schema.json"
+    },
+    "temporal": {
+      "$ref": "common/temporal.schema.json"
+    },
+    "links": {
+      "type": "array",
+      "items": { "$ref": "common/link.schema.json" },
+      "description": "Outbound link analysis"
+    },
+    "embeddings": {
+      "type": "object",
+      "description": "Optional vector representations"
+    },
+    "extensions": {
+      "type": "object",
+      "patternProperties": {
+        "^x-": { "type": "object" }
+      },
+      "additionalProperties": false,
+      "description": "Vendor-namespaced custom fields"
+    }
+  }
+}`} lang="json" title="Property definitions" />
+
+## Field types and constraints
+
+| Field | JSON Type | Constraint | Notes |
+|-------|----------|-----------|-------|
+| `sdf_version` | string | Semver pattern `^\d+\.\d+\.\d+$` | Must match `"0.2.0"` for current spec |
+| `id` | string | Prefix `^sdf_` | Unique across documents |
+| `parent_type` | string | Enum of 10 values | Determines type_data schema |
+| `type` | string | Pattern `^{parent_type}\.` | Must start with parent_type |
+| `aspects` | array of strings | — | Optional secondary types |
+| `source` | object | Ref: source schema | URL, domain, timestamp required |
+| `summary` | object | Ref: summary schema | one_line and key_points required |
+| `entities` | array of objects | Ref: entity schema | name and type required per entity |
+| `claims` | array of objects | Ref: claim schema | claim, source_type, confidence required |
+| `topics` | array of strings | — | Free-text topic labels |
+| `relationships` | array of objects | Ref: relationship schema | subject, predicate, object required |
+| `type_data` | object | Conditional by parent_type | Type-specific validation |
+| `sections` | array of objects | — | heading, level, content per section |
+| `metadata` | object | — | Free-form page metadata |
+| `provenance` | object | Ref: provenance schema | converter, model, content_hash required |
+| `temporal` | object | Ref: temporal schema | ISO 8601 date fields |
+| `links` | array of objects | Ref: link schema | url and relationship required |
+| `embeddings` | object | — | Model, dimensions, vectors |
+| `extensions` | object | Keys must match `^x-` | Vendor-namespaced only |
+
+## Type-conditional validation
+
+The root schema applies type-specific validation to `type_data` using JSON Schema conditional composition:
+
+```json
+{
+  "allOf": [
+    {
+      "if": { "properties": { "parent_type": { "const": "article" } } },
+      "then": { "properties": { "type_data": { "$ref": "types/article.schema.json" } } }
+    },
+    {
+      "if": { "properties": { "parent_type": { "const": "commerce" } } },
+      "then": { "properties": { "type_data": { "$ref": "types/commerce.schema.json" } } }
+    }
+  ]
+}
+```
+
+This pattern ensures that `type_data` for an `article` document is validated against the article schema, `type_data` for a `commerce` document is validated against the commerce schema, and so on.
+
+## GitHub
+
+The complete schema files are maintained in the SDF GitHub repository:
+
+[github.com/nicholasgriffintn/sdf](https://github.com/nicholasgriffintn/sdf)
+
+Schema files are versioned alongside the protocol specification. Each protocol version has a corresponding set of schema files.

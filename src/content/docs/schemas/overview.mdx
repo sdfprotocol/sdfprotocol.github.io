@@ -1,0 +1,103 @@
+---
+title: Schema Overview
+description: "SDF's modular JSON Schema validation system — architecture, schema files, and validation requirements."
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Modular JSON Schema system
+
+SDF uses JSON Schema (draft 2020-12) for document validation. The schema system is modular: a root document schema defines the top-level structure, type-specific schemas define `type_data` constraints per parent type, and common definitions are shared across schemas.
+
+Every SDF document **must** pass schema validation. A document that fails validation is not a valid SDF document.
+
+## Architecture
+
+```
+schemas/
+├── sdf-document.schema.json          # Root document schema
+├── common/
+│   ├── source.schema.json             # Source field definitions
+│   ├── summary.schema.json            # Summary field definitions
+│   ├── entity.schema.json             # Entity field definitions
+│   ├── claim.schema.json              # Claim field definitions
+│   ├── relationship.schema.json       # Relationship field definitions
+│   ├── provenance.schema.json         # Provenance field definitions
+│   ├── temporal.schema.json           # Temporal field definitions
+│   └── link.schema.json               # Link field definitions
+├── types/
+│   ├── article.schema.json            # article type_data schema
+│   ├── documentation.schema.json      # documentation type_data schema
+│   ├── commerce.schema.json           # commerce type_data schema
+│   ├── discussion.schema.json         # discussion type_data schema
+│   ├── reference.schema.json          # reference type_data schema
+│   ├── data.schema.json               # data type_data schema
+│   ├── code.schema.json               # code type_data schema
+│   ├── profile.schema.json            # profile type_data schema
+│   ├── event.schema.json              # event type_data schema
+│   └── media.schema.json              # media type_data schema
+└── extensions/
+    └── extension.schema.json          # Extension namespace validation
+```
+
+The schema system comprises **30+ schema files** organized into three categories:
+
+### Root document schema
+`sdf-document.schema.json` defines the top-level document structure: required fields, field types, and references to common and type-specific schemas.
+
+### Common definitions
+Shared schemas for fields that appear across all document types: source, summary, entities, claims, relationships, provenance, temporal, and links.
+
+### Type-specific schemas
+Each of the 10 parent types has a dedicated schema defining the valid `type_data` fields. The root schema uses the `parent_type` field to select the appropriate type schema via conditional (`if`/`then`) composition.
+
+## Validation requirements
+
+1. **All fields** must conform to their declared types (string, number, array, object)
+2. **Required fields** must be present: `sdf_version`, `id`, `parent_type`, `type`, `source`, `summary`, `entities`, `type_data`, `provenance`
+3. **`parent_type`** must be one of the 10 canonical parent types
+4. **`type`** must follow the `parent_type.subtype` format with a valid subtype
+5. **`type_data`** must validate against the schema for the declared `parent_type`
+6. **`sdf_version`** must be a valid semver string
+7. **`id`** must be prefixed with `sdf_`
+8. **Extensions** must use `x-{vendor}` namespaced keys
+
+## Schema composition
+
+The root schema uses JSON Schema's `$ref` and conditional composition to select type-specific validation:
+
+```json
+{
+  "if": {
+    "properties": {
+      "parent_type": { "const": "article" }
+    }
+  },
+  "then": {
+    "properties": {
+      "type_data": { "$ref": "types/article.schema.json" }
+    }
+  }
+}
+```
+
+This pattern is repeated for each parent type, ensuring that `type_data` validation is always type-aware.
+
+## Validation in practice
+
+Converters must validate output before publishing. Consumers may validate on ingestion for quality assurance, but the primary validation responsibility lies with the producer.
+
+Recommended validators:
+- **Node.js**: `ajv` with draft 2020-12 support
+- **Python**: `jsonschema` with `referencing` for `$ref` resolution
+- **Go**: `santhosh-tekuri/jsonschema`
+- **Rust**: `jsonschema-rs`
+
+<CardGrid>
+  <Card title="Document Schema" icon="document">
+    See the [SDF Document Schema](/schemas/document/) for the root schema definition.
+  </Card>
+  <Card title="Type Reference" icon="list-format">
+    See the [Type Taxonomy](/types/taxonomy/) for all type-specific field definitions.
+  </Card>
+</CardGrid>

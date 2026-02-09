@@ -1,0 +1,81 @@
+---
+title: "profile"
+description: "SDF type reference for profile — entity profiles for people, organizations, and places. Subtypes: person, organization, place, product_profile, portfolio."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Overview
+
+The `profile` parent type covers entity profile pages: people, organizations, places, product profiles, and portfolios. It captures structured identity and biographical data that agents use for entity resolution and knowledge graph construction.
+
+## Subtypes
+
+| Subtype | Qualified Type | Description |
+|---------|---------------|-------------|
+| `person` | `profile.person` | Individual person profile |
+| `organization` | `profile.organization` | Company, institution, or group profile |
+| `place` | `profile.place` | Location or venue profile |
+| `product_profile` | `profile.product_profile` | Product landing page or profile |
+| `portfolio` | `profile.portfolio` | Portfolio or collection showcase |
+
+## type_data fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `entity_name` | `string` | Yes | Canonical name of the profiled entity |
+| `entity_type` | `string` | Yes | Type of entity (person, organization, place, product, portfolio) |
+| `bio` | `string` | No | Biography or description |
+| `affiliations` | `array<string>` | No | Associated organizations, groups, or institutions |
+| `social_links` | `array<object>` | No | Social media and web presence links |
+| `achievements` | `array<string>` | No | Notable achievements, awards, or milestones |
+
+## Example type_data
+
+<Code code={`{
+  "type_data": {
+    "entity_name": "Dr. Fei-Fei Li",
+    "entity_type": "person",
+    "bio": "Computer scientist and professor at Stanford University, known for pioneering work in computer vision and artificial intelligence. Co-director of the Stanford Human-Centered AI Institute (HAI).",
+    "affiliations": [
+      "Stanford University",
+      "Stanford HAI",
+      "ImageNet"
+    ],
+    "social_links": [
+      {
+        "platform": "twitter",
+        "url": "https://twitter.com/drfeifei"
+      },
+      {
+        "platform": "google_scholar",
+        "url": "https://scholar.google.com/citations?user=rDfyQnIAAAAJ"
+      },
+      {
+        "platform": "website",
+        "url": "https://profiles.stanford.edu/fei-fei-li"
+      }
+    ],
+    "achievements": [
+      "Created ImageNet dataset and challenge",
+      "Fellow of the American Academy of Arts and Sciences",
+      "Named one of TIME 100 Most Influential People"
+    ]
+  }
+}`} lang="json" title="profile type_data" />
+
+## Social link schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `platform` | `string` | Platform name (twitter, linkedin, github, website, etc.) |
+| `url` | `string` | URL of the profile on that platform |
+
+## Notes
+
+- `entity_name` is the canonical name, which may differ from the page title. Use the most common and recognizable form.
+- `entity_type` mirrors the subtype but is explicit in the type_data for ease of consumption.
+- `bio` is a concise summary, not the full profile text. The complete content is in `sections`.
+- `affiliations` lists current affiliations. Historical affiliations should be captured in `sections` or `entities`.
+- `social_links` captures links found on the profile page. The `platform` field is normalized to lowercase identifiers.
+- For organizational profiles with product listings, use `aspects: ["commerce.product"]` if the page also functions as a product page.

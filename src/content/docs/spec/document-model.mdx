@@ -1,0 +1,291 @@
+---
+title: Document Model
+description: "Complete field reference for the SDF document structure — all top-level fields, types, and constraints."
+---
+
+import { Code, Badge } from '@astrojs/starlight/components';
+
+## Top-level fields
+
+An SDF document is a JSON object containing the following top-level fields:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `sdf_version` | `string` | Yes | Protocol version (semver). Current: `"0.2.0"` |
+| `id` | `string` | Yes | Unique identifier, prefixed `sdf_` |
+| `parent_type` | `string` | Yes | One of 10 parent types |
+| `type` | `string` | Yes | Qualified type as `parent_type.subtype` |
+| `aspects` | `array<string>` | No | Additional type aspects for multi-type content |
+| `source` | `object` | Yes | Origin metadata |
+| `summary` | `object` | Yes | Multi-level summarization |
+| `entities` | `array<object>` | Yes | Extracted named entities |
+| `claims` | `array<object>` | No | Factual assertions |
+| `topics` | `array<string>` | No | Topic labels |
+| `relationships` | `array<object>` | No | Entity relationship triples |
+| `type_data` | `object` | Yes | Type-specific structured fields |
+| `sections` | `array<object>` | No | Document structural sections |
+| `metadata` | `object` | No | Page-level metadata |
+| `provenance` | `object` | Yes | Conversion audit trail |
+| `temporal` | `object` | No | Time-related metadata |
+| `links` | `array<object>` | No | Outbound link analysis |
+| `embeddings` | `object` | No | Vector representations |
+| `extensions` | `object` | No | Vendor-namespaced custom fields |
+
+## Field definitions
+
+### `source`
+
+Origin metadata for the converted content.
+
+```json
+{
+  "source": {
+    "url": "https://example.com/page",
+    "domain": "example.com",
+    "fetch_timestamp": "2025-03-15T14:30:00Z",
+    "http_status": 200,
+    "content_type": "text/html",
+    "language": "en",
+    "canonical_url": "https://example.com/page"
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `url` | `string` | Yes | URL that was fetched |
+| `domain` | `string` | Yes | Domain of the source URL |
+| `fetch_timestamp` | `string` (ISO 8601) | Yes | When the content was fetched |
+| `http_status` | `integer` | Yes | HTTP status code of the fetch |
+| `content_type` | `string` | Yes | MIME type of the fetched content |
+| `language` | `string` | No | BCP 47 language tag |
+| `canonical_url` | `string` | No | Canonical URL if different from fetch URL |
+
+### `summary`
+
+Multi-level summarization of the content.
+
+```json
+{
+  "summary": {
+    "one_line": "Brief one-sentence summary.",
+    "key_points": [
+      "First key point",
+      "Second key point"
+    ],
+    "abstract": "Paragraph-length summary providing more context and detail."
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `one_line` | `string` | Yes | Single-sentence summary |
+| `key_points` | `array<string>` | Yes | Bullet-point key takeaways |
+| `abstract` | `string` | No | Paragraph-length summary |
+
+### `entities`
+
+Named entities extracted from the content.
+
+```json
+{
+  "entities": [
+    {
+      "name": "OpenAI",
+      "type": "organization",
+      "role": "subject",
+      "salience": 0.92,
+      "description": "AI research company"
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | `string` | Yes | Entity name as it appears in content |
+| `type` | `string` | Yes | Entity type (person, organization, location, etc.) |
+| `role` | `string` | No | Role in the content (subject, quoted_source, etc.) |
+| `salience` | `number` (0-1) | No | Relevance score |
+| `description` | `string` | No | Brief entity description |
+
+### `claims`
+
+Factual assertions extracted from the content.
+
+```json
+{
+  "claims": [
+    {
+      "claim": "Revenue increased 23% year-over-year",
+      "source_type": "direct",
+      "confidence": 0.95,
+      "supporting_entities": ["Acme Corp"]
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `claim` | `string` | Yes | The factual assertion |
+| `source_type` | `string` | Yes | `direct`, `inferred`, or `attributed` |
+| `confidence` | `number` (0-1) | Yes | Extraction confidence |
+| `supporting_entities` | `array<string>` | No | Entity names supporting this claim |
+
+### `relationships`
+
+Subject-predicate-object triples.
+
+```json
+{
+  "relationships": [
+    {
+      "subject": "Google",
+      "predicate": "acquired",
+      "object": "DeepMind",
+      "confidence": 0.97
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `subject` | `string` | Yes | Subject entity |
+| `predicate` | `string` | Yes | Relationship verb |
+| `object` | `string` | Yes | Object entity |
+| `confidence` | `number` (0-1) | No | Confidence score |
+
+### `type_data`
+
+Type-specific structured fields. The schema for this object is determined by the `parent_type` field. See the [Type Reference](/types/taxonomy/) for field definitions per type.
+
+### `sections`
+
+Document structural breakdown.
+
+```json
+{
+  "sections": [
+    {
+      "heading": "Introduction",
+      "level": 1,
+      "content": "Section content text...",
+      "word_count": 245
+    }
+  ]
+}
+```
+
+### `metadata`
+
+Page-level metadata extracted from HTML `<head>` and structured data.
+
+```json
+{
+  "metadata": {
+    "title": "Page Title",
+    "description": "Meta description",
+    "keywords": ["keyword1", "keyword2"],
+    "og_image": "https://example.com/image.jpg",
+    "author": "Author Name"
+  }
+}
+```
+
+### `provenance`
+
+Conversion audit trail. See [Provenance](/spec/provenance/) for full details.
+
+### `temporal`
+
+Time-related metadata.
+
+```json
+{
+  "temporal": {
+    "publish_date": "2025-03-15",
+    "modified_date": "2025-03-16",
+    "expiry_date": null,
+    "temporal_coverage": {
+      "start": "2025-01-01",
+      "end": "2025-03-15"
+    }
+  }
+}
+```
+
+### `links`
+
+Outbound link analysis.
+
+```json
+{
+  "links": [
+    {
+      "url": "https://other.com/resource",
+      "text": "link anchor text",
+      "relationship": "reference",
+      "domain": "other.com"
+    }
+  ]
+}
+```
+
+### `embeddings`
+
+Optional vector representations for semantic search.
+
+```json
+{
+  "embeddings": {
+    "model": "text-embedding-3-small",
+    "dimensions": 1536,
+    "vectors": {
+      "summary": [0.012, -0.034, ...],
+      "full_content": [0.008, -0.021, ...]
+    }
+  }
+}
+```
+
+### `extensions`
+
+Vendor-namespaced custom fields. See [Content Negotiation](/spec/content-negotiation/) for the extension mechanism.
+
+```json
+{
+  "extensions": {
+    "x-acme": {
+      "internal_id": "ACM-12345",
+      "department": "research"
+    }
+  }
+}
+```
+
+All extension keys must be prefixed with `x-` followed by a vendor identifier.
+
+## Example document skeleton
+
+<Code code={`{
+  "sdf_version": "0.2.0",
+  "id": "sdf_abc123",
+  "parent_type": "article",
+  "type": "article.news",
+  "source": { "url": "...", "domain": "...", "fetch_timestamp": "...", "http_status": 200, "content_type": "text/html" },
+  "summary": { "one_line": "...", "key_points": ["..."], "abstract": "..." },
+  "entities": [{ "name": "...", "type": "...", "salience": 0.9 }],
+  "claims": [{ "claim": "...", "source_type": "direct", "confidence": 0.9 }],
+  "topics": ["..."],
+  "relationships": [{ "subject": "...", "predicate": "...", "object": "..." }],
+  "type_data": { },
+  "sections": [{ "heading": "...", "level": 1, "content": "..." }],
+  "metadata": { "title": "..." },
+  "provenance": { "converter": "...", "model": "...", "content_hash": "sha256:..." },
+  "temporal": { "publish_date": "..." },
+  "links": [{ "url": "...", "text": "...", "relationship": "reference" }],
+  "extensions": { }
+}`} lang="json" title="SDF Document Skeleton" />

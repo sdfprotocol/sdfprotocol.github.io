@@ -1,0 +1,112 @@
+---
+title: "documentation"
+description: "SDF type reference for documentation — technical and instructional content. Subtypes: tutorial, api_reference, guide, faq, changelog, troubleshooting."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Overview
+
+The `documentation` parent type covers technical and instructional content for products, APIs, platforms, and services. This includes tutorials, API references, user guides, FAQs, changelogs, and troubleshooting content.
+
+## Subtypes
+
+| Subtype | Qualified Type | Description |
+|---------|---------------|-------------|
+| `tutorial` | `documentation.tutorial` | Step-by-step instructional content |
+| `api_reference` | `documentation.api_reference` | API endpoint and method documentation |
+| `guide` | `documentation.guide` | Conceptual or how-to guides |
+| `faq` | `documentation.faq` | Frequently asked questions |
+| `changelog` | `documentation.changelog` | Version history and release notes |
+| `troubleshooting` | `documentation.troubleshooting` | Problem-solution content |
+
+## type_data fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `product` | `string` | Yes | Product or project name |
+| `version` | `string` | No | Product version the docs apply to |
+| `platform` | `string` | No | Target platform (e.g., "web", "iOS", "Linux") |
+| `prerequisites` | `array<string>` | No | Required knowledge or setup |
+| `api_endpoints` | `array<object>` | No | API endpoints documented on this page |
+| `code_samples` | `array<object>` | No | Code samples included in the content |
+| `deprecation_notices` | `array<object>` | No | Deprecation warnings for documented features |
+
+## Example type_data
+
+<Code code={`{
+  "type_data": {
+    "product": "Stripe API",
+    "version": "2024-12-18",
+    "platform": "web",
+    "prerequisites": [
+      "Stripe account with API keys",
+      "Node.js >= 18",
+      "stripe npm package installed"
+    ],
+    "api_endpoints": [
+      {
+        "method": "POST",
+        "path": "/v1/payment_intents",
+        "description": "Create a PaymentIntent"
+      },
+      {
+        "method": "GET",
+        "path": "/v1/payment_intents/{id}",
+        "description": "Retrieve a PaymentIntent"
+      }
+    ],
+    "code_samples": [
+      {
+        "language": "javascript",
+        "label": "Create a payment intent",
+        "lines": 12
+      },
+      {
+        "language": "python",
+        "label": "Create a payment intent (Python)",
+        "lines": 10
+      }
+    ],
+    "deprecation_notices": [
+      {
+        "feature": "Sources API",
+        "deprecated_date": "2024-06-01",
+        "removal_date": "2025-06-01",
+        "replacement": "PaymentMethods API"
+      }
+    ]
+  }
+}`} lang="json" title="documentation type_data" />
+
+## API endpoint schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `method` | `string` | HTTP method (GET, POST, PUT, DELETE, PATCH) |
+| `path` | `string` | Endpoint path |
+| `description` | `string` | Brief endpoint description |
+
+## Code sample schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `language` | `string` | Programming language |
+| `label` | `string` | Description of the code sample |
+| `lines` | `integer` | Number of lines in the sample |
+
+## Deprecation notice schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `feature` | `string` | Name of the deprecated feature |
+| `deprecated_date` | `string` | When the feature was deprecated |
+| `removal_date` | `string` | When the feature will be removed |
+| `replacement` | `string` | Suggested replacement |
+
+## Notes
+
+- The `product` field should match the canonical product name, not a page-specific title.
+- `version` tracks the product version, not the document version. Use `provenance` for document versioning.
+- `api_endpoints` captures endpoints *documented on this page*, not the entire API surface.
+- Code samples are summarized (language, label, line count) rather than reproduced in full. The actual code is in the `sections` field.

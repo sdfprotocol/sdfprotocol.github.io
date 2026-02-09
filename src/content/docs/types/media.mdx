@@ -1,0 +1,55 @@
+---
+title: "media"
+description: "SDF type reference for media — audio, video, and multimedia content. Subtypes: video, podcast, music, image_gallery, livestream, animation."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Overview
+
+The `media` parent type covers audio, video, and multimedia content including videos, podcasts, music, image galleries, livestreams, and animations. It captures the metadata agents need for media discovery, indexing, and accessibility.
+
+## Subtypes
+
+| Subtype | Qualified Type | Description |
+|---------|---------------|-------------|
+| `video` | `media.video` | Video content (YouTube, Vimeo, etc.) |
+| `podcast` | `media.podcast` | Podcast episode or series page |
+| `music` | `media.music` | Music track, album, or playlist |
+| `image_gallery` | `media.image_gallery` | Photo or image collection |
+| `livestream` | `media.livestream` | Live streaming content |
+| `animation` | `media.animation` | Animated or interactive media |
+
+## type_data fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `title` | `string` | Yes | Media title |
+| `format` | `string` | No | Media format (video, audio, image, interactive) |
+| `duration` | `string` | No | Duration in ISO 8601 duration format (e.g., "PT1H23M45S") |
+| `creator` | `string` | No | Creator or channel name |
+| `platform` | `string` | No | Hosting platform (youtube, spotify, etc.) |
+| `transcript_available` | `boolean` | No | Whether a transcript is available |
+
+## Example type_data
+
+<Code code={`{
+  "type_data": {
+    "title": "Attention Is All You Need — Paper Explained",
+    "format": "video",
+    "duration": "PT45M12S",
+    "creator": "Yannic Kilcher",
+    "platform": "youtube",
+    "transcript_available": true
+  }
+}`} lang="json" title="media type_data" />
+
+## Notes
+
+- `title` is the media-specific title, which may differ from `metadata.title` (the page title).
+- `format` normalizes to: `"video"`, `"audio"`, `"image"`, `"interactive"`. This is the primary media format, not the file format.
+- `duration` uses ISO 8601 duration format. `"PT1H23M45S"` means 1 hour, 23 minutes, 45 seconds. For content without a fixed duration (e.g., livestreams), omit this field.
+- `creator` is the content creator or channel name, not the platform. Use `platform` for the hosting service.
+- `platform` is normalized to lowercase identifiers: `"youtube"`, `"spotify"`, `"vimeo"`, `"soundcloud"`, `"twitch"`, etc.
+- `transcript_available` indicates whether a transcript exists, not whether the SDF document includes it. Transcripts, when available, are in the `sections` field.
+- For podcast episodes that are essentially interviews, use `aspects: ["discussion.comment_thread"]` if the conversational structure is significant.

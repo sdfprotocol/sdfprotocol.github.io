@@ -1,0 +1,74 @@
+---
+title: "article"
+description: "SDF type reference for article — authored content for publication. Subtypes: news, blog, opinion, review, analysis, press_release."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Overview
+
+The `article` parent type covers authored content produced for publication. This is the most common parent type in production, representing over 34% of all documents.
+
+## Subtypes
+
+| Subtype | Qualified Type | Description |
+|---------|---------------|-------------|
+| `news` | `article.news` | News reporting and journalism |
+| `blog` | `article.blog` | Blog posts and personal essays |
+| `opinion` | `article.opinion` | Opinion pieces and editorials |
+| `review` | `article.review` | Product, service, or media reviews |
+| `analysis` | `article.analysis` | In-depth analytical content |
+| `press_release` | `article.press_release` | Official press releases and announcements |
+
+## type_data fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `authors` | `array<string>` | Yes | Author names |
+| `byline` | `string` | No | Full byline as displayed |
+| `publish_date` | `string` (ISO 8601 date) | Yes | Publication date |
+| `section` | `string` | No | Publication section (e.g., "Technology", "Politics") |
+| `word_count` | `integer` | No | Total word count of the article |
+| `reading_time` | `integer` | No | Estimated reading time in minutes |
+| `sources` | `array<string>` | No | Sources cited in the article |
+| `corrections` | `array<object>` | No | Published corrections or updates |
+
+## Example type_data
+
+<Code code={`{
+  "type_data": {
+    "authors": ["Maria Schmidt", "James Chen"],
+    "byline": "Maria Schmidt and James Chen, Technology Desk",
+    "publish_date": "2025-03-15",
+    "section": "Technology",
+    "word_count": 2847,
+    "reading_time": 12,
+    "sources": [
+      "EU Parliament records",
+      "Press conference transcript",
+      "Industry analyst interviews"
+    ],
+    "corrections": [
+      {
+        "date": "2025-03-16",
+        "description": "Corrected the implementation timeline from 12 to 18 months"
+      }
+    ]
+  }
+}`} lang="json" title="article type_data" />
+
+## Corrections schema
+
+When an article has been corrected after publication, the `corrections` array records each correction:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `date` | `string` (ISO 8601 date) | Date the correction was made |
+| `description` | `string` | Description of what was corrected |
+
+## Notes
+
+- The `authors` field should contain individual author names, not organizational bylines. Use `byline` for the full displayed attribution.
+- `publish_date` is the original publication date, not the SDF conversion date. Use `provenance.conversion_timestamp` for conversion timing.
+- `reading_time` is calculated at approximately 238 words per minute.
+- For reviews that also have commerce aspects (e.g., product reviews with pricing), use `aspects: ["commerce.product"]` on the document.

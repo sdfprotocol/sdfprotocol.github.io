@@ -1,0 +1,137 @@
+---
+title: Provenance
+description: "Conversion audit trail — converter identity, model attribution, content hashing, and confidence scoring."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Purpose
+
+Every SDF document carries a `provenance` object that records how the document was produced. This enables consumers to assess document quality, detect stale conversions, deduplicate content, and audit the conversion pipeline.
+
+## Provenance fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `converter` | `string` | Yes | Identifier of the conversion system |
+| `converter_version` | `string` | Yes | Version of the converter |
+| `model` | `string` | Yes | Model used for extraction |
+| `conversion_timestamp` | `string` (ISO 8601) | Yes | When the conversion was performed |
+| `conversion_confidence` | `number` (0-1) | Yes | Overall confidence score for the conversion |
+| `content_hash` | `string` | Yes | Content hash for deduplication (format: `algorithm:hex`) |
+| `processing_chain` | `array<object>` | No | Ordered list of processing steps |
+
+## `converter`
+
+Identifies the system that produced the SDF document. This is a free-form string but should be consistent across conversions from the same system.
+
+Examples: `"sdf-pipeline"`, `"acme-converter"`, `"publisher-native"`
+
+## `model`
+
+The ML model or extraction engine used. For multi-model pipelines, this is the primary extraction model.
+
+Examples: `"sdf-extractor-3b"`, `"gpt-4o"`, `"custom-ner-v2"`
+
+## `processing_chain`
+
+For multi-stage pipelines, the processing chain records each step:
+
+```json
+{
+  "processing_chain": [
+    {
+      "step": "classification",
+      "model": "sdf-classifier-1.5b",
+      "duration_ms": 45,
+      "output": "article.news"
+    },
+    {
+      "step": "extraction",
+      "model": "sdf-extractor-3b",
+      "duration_ms": 320,
+      "output": "document"
+    },
+    {
+      "step": "validation",
+      "model": "json-schema",
+      "duration_ms": 12,
+      "output": "valid"
+    }
+  ]
+}
+```
+
+Each step records the operation name, the model used, processing duration, and a summary of the output.
+
+## `content_hash`
+
+A hash of the source content, used for deduplication and cache validation. Format is `algorithm:hex_digest`.
+
+```
+"content_hash": "sha256:8a3b1c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b"
+```
+
+Agents use the content hash to determine if a document has changed since a previous fetch. If the hash matches, the agent can skip re-processing.
+
+Recommended algorithm: SHA-256. The hash is computed over the raw source content (HTML) before conversion.
+
+## `conversion_confidence`
+
+A float between 0 and 1 representing the converter's overall confidence in the extraction quality. This is typically an aggregate of per-field confidences.
+
+| Range | Interpretation |
+|-------|---------------|
+| 0.90 - 1.00 | High confidence — suitable for automated consumption |
+| 0.70 - 0.89 | Moderate confidence — review recommended for critical applications |
+| 0.50 - 0.69 | Low confidence — extraction may have significant gaps |
+| Below 0.50 | Very low confidence — manual verification recommended |
+
+## Example
+
+<Code code={`{
+  "provenance": {
+    "converter": "sdf-pipeline",
+    "converter_version": "0.2.0",
+    "model": "sdf-extractor-3b",
+    "conversion_timestamp": "2025-03-15T15:02:30Z",
+    "conversion_confidence": 0.91,
+    "content_hash": "sha256:8a3b1c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
+    "processing_chain": [
+      {
+        "step": "fetch",
+        "model": null,
+        "duration_ms": 230,
+        "output": "200 OK"
+      },
+      {
+        "step": "classify",
+        "model": "sdf-classifier-1.5b",
+        "duration_ms": 42,
+        "output": "article.news"
+      },
+      {
+        "step": "extract",
+        "model": "sdf-extractor-3b",
+        "duration_ms": 315,
+        "output": "18 fields extracted"
+      },
+      {
+        "step": "validate",
+        "model": "json-schema-draft-2020-12",
+        "duration_ms": 8,
+        "output": "valid"
+      }
+    ]
+  }
+}`} lang="json" title="Provenance Block" />
+
+## Consumer guidance
+
+Agents should use provenance data to:
+
+1. **Filter by confidence** — Skip documents below a confidence threshold for the use case
+2. **Deduplicate** — Use `content_hash` to avoid processing the same content twice
+3. **Audit** — Track which converter and model versions produced consumed documents
+4. **Freshness** — Compare `conversion_timestamp` against acceptable staleness windows
+5. **Pipeline transparency** — Inspect `processing_chain` to understand extraction methodology

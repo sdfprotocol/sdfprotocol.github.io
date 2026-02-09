@@ -1,0 +1,100 @@
+---
+title: Protocol v0.2
+description: "SDF Protocol specification overview — design goals, versioning, and changelog."
+---
+
+import { Card, CardGrid, Badge, Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Badge text="Draft v0.2.0" variant="caution" size="medium" />
+
+## Status
+
+SDF Protocol v0.2.0 is a **draft specification**. The protocol is under active development. Breaking changes may occur between minor versions until v1.0.
+
+## Design goals
+
+| Goal | Description |
+|------|-------------|
+| **Agent-first** | Every design decision optimizes for machine consumption, not human reading |
+| **Schema-validated** | All documents must pass JSON Schema validation (draft 2020-12) |
+| **Type-aware** | Hierarchical type system with parent types and subtypes drives field selection |
+| **Provenance-complete** | Every document carries full conversion audit trail |
+| **Cacheable** | Content hashing enables deduplication and incremental updates |
+| **Extensible** | Vendor namespaces allow domain-specific extensions without protocol changes |
+| **Resolution-flexible** | Compact, standard, and full resolution levels serve different consumer needs |
+| **Transport-agnostic** | SDF documents are JSON payloads; delivery mechanism is orthogonal |
+
+## Protocol header
+
+Every SDF document begins with four required header fields:
+
+```json
+{
+  "sdf_version": "0.2.0",
+  "id": "sdf_a1b2c3d4e5f6",
+  "parent_type": "article",
+  "type": "article.news"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `sdf_version` | `string` | Yes | Semantic version of the SDF protocol used to produce this document |
+| `id` | `string` | Yes | Unique document identifier, prefixed with `sdf_` |
+| `parent_type` | `string` | Yes | One of 10 parent types (e.g., `article`, `commerce`, `code`) |
+| `type` | `string` | Yes | Fully qualified type as `parent_type.subtype` (e.g., `article.news`) |
+
+The `parent_type` field determines which `type_data` schema applies. The `type` field provides finer-grained classification within that parent type.
+
+See [Type System](/spec/type-system/) for the complete taxonomy.
+
+## Document structure
+
+Beyond the header, an SDF document contains these top-level sections:
+
+- **`source`** — Origin metadata (URL, domain, fetch timestamp)
+- **`summary`** — Multi-level summarization (one-line, key points, abstract)
+- **`entities`** — Named entities with types, roles, and salience
+- **`claims`** — Factual assertions with confidence and attribution
+- **`topics`** — Topic classification labels
+- **`relationships`** — Subject-predicate-object triples
+- **`type_data`** — Type-specific structured fields
+- **`sections`** — Document structure (headings, content blocks)
+- **`metadata`** — Page-level metadata (title, description, keywords)
+- **`provenance`** — Conversion audit trail
+- **`temporal`** — Time-related metadata
+- **`links`** — Outbound link analysis
+- **`embeddings`** — Optional vector representations
+- **`extensions`** — Vendor-namespaced custom fields
+
+See [Document Model](/spec/document-model/) for complete field definitions.
+
+## Changelog
+
+### v0.2.0 (Current draft)
+
+- Added `aspects` field for multi-type content
+- Introduced type normalization cascade (5 stages)
+- Added `content_hash` to provenance for deduplication
+- Expanded type taxonomy to 50+ subtypes
+- Added `extensions` field with vendor namespace support
+- Introduced resolution levels (compact, standard, full)
+- Added `/.well-known/sdf.json` discovery mechanism
+- Content negotiation via `Accept: application/sdf+json`
+
+### v0.1.0
+
+- Initial protocol definition
+- 10 parent types with basic subtypes
+- Core document model: source, summary, entities, claims, relationships
+- Provenance tracking
+- JSON Schema validation
+
+<CardGrid>
+  <Card title="Document Model" icon="document">
+    Complete field reference for SDF documents. See [Document Model](/spec/document-model/).
+  </Card>
+  <Card title="Type System" icon="list-format">
+    Hierarchical type taxonomy with 10 parent types and 50+ subtypes. See [Type System](/spec/type-system/).
+  </Card>
+</CardGrid>

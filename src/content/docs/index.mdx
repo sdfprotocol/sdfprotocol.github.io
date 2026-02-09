@@ -1,0 +1,57 @@
+---
+title: SDF Protocol
+description: The open protocol for structured, agent-readable web content.
+template: splash
+hero:
+  tagline: "Convert once, consume everywhere. SDF defines a canonical JSON format for pre-compiled semantic representations of web pages — entities, claims, relationships, type-specific data — that AI agents consume directly."
+  actions:
+    - text: Read the Spec
+      link: /spec/protocol/
+      icon: right-arrow
+    - text: Quick Example
+      link: /overview/example/
+      icon: right-arrow
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## The open protocol for structured, agent-readable web content
+
+SDF (Structured Data Format) is a JSON-based protocol that eliminates redundant extraction work across AI agents. Instead of every agent independently parsing raw HTML, publishers convert once and agents consume a canonical, schema-validated representation.
+
+<CardGrid>
+  <Card title="Schema-Validated" icon="approve-check">
+    Every SDF document validates against JSON Schema (draft 2020-12). Structural guarantees mean agents skip parsing heuristics entirely.
+  </Card>
+  <Card title="Type-Aware" icon="list-format">
+    10 parent types, 50+ subtypes. Articles, commerce, code, events, discussions — each with type-specific structured fields that agents can query directly.
+  </Card>
+  <Card title="Cacheable" icon="rocket">
+    Content hashing via `content_hash` enables deduplication and cache validation. Agents skip re-processing when content has not changed.
+  </Card>
+  <Card title="Provenance" icon="information">
+    Full audit trail: converter identity, model used, processing chain, confidence scores. Consumers know exactly how the document was produced.
+  </Card>
+</CardGrid>
+
+## Why not just use HTML?
+
+A typical web page is **89 KB** of HTML — ads, nav, scripts, boilerplate. That becomes **~73,000 tokens** for an LLM to process. The same content in SDF is **~750 tokens**: pre-extracted entities, claims, relationships, and type-specific structured data.
+
+SDF is the **compilation layer** between web content and AI agents.
+
+<CardGrid>
+  <Card title="99% fewer tokens" icon="down-caret">
+    From raw HTML to structured JSON. Agents process only the semantic content.
+  </Card>
+  <Card title="90% extraction accuracy" icon="approve-check">
+    Schema-constrained extraction with type normalization achieves 90% exact match in production.
+  </Card>
+  <Card title="4.1x faster pipeline" icon="rocket">
+    Specialized 1.5B + 3B model cascade outperforms monolithic 14B extraction by 4.1x.
+  </Card>
+  <Card title="2,335 documents" icon="open-book">
+    Validated across 74 type combinations in production deployment.
+  </Card>
+</CardGrid>

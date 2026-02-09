@@ -1,0 +1,66 @@
+---
+title: "data"
+description: "SDF type reference for data — datasets, statistics, and data-centric content. Subtypes: dataset, statistics, report, dashboard, financial, scientific."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Overview
+
+The `data` parent type covers data-centric content including published datasets, statistical reports, dashboards, financial data, and scientific data. This type captures the metadata needed for agents to evaluate data quality, scope, and applicability.
+
+## Subtypes
+
+| Subtype | Qualified Type | Description |
+|---------|---------------|-------------|
+| `dataset` | `data.dataset` | Published dataset or data download |
+| `statistics` | `data.statistics` | Statistical summaries or reports |
+| `report` | `data.report` | Data-driven report or analysis |
+| `dashboard` | `data.dashboard` | Dashboard or data visualization page |
+| `financial` | `data.financial` | Financial data, earnings, market data |
+| `scientific` | `data.scientific` | Scientific data and measurements |
+
+## type_data fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `dataset_name` | `string` | Yes | Name of the dataset or data source |
+| `instrument` | `string` | No | Measurement instrument or data collection method |
+| `time_range` | `object` | No | Time period the data covers |
+| `frequency` | `string` | No | Data update frequency (e.g., "daily", "quarterly") |
+| `units` | `string` | No | Primary unit of measurement |
+| `methodology` | `string` | No | Brief description of data collection methodology |
+| `data_points` | `integer` | No | Number of data points or records |
+
+## Example type_data
+
+<Code code={`{
+  "type_data": {
+    "dataset_name": "US Consumer Price Index (CPI-U)",
+    "instrument": "Bureau of Labor Statistics survey",
+    "time_range": {
+      "start": "2020-01-01",
+      "end": "2025-02-28"
+    },
+    "frequency": "monthly",
+    "units": "index (1982-84=100)",
+    "methodology": "Probability-based survey of approximately 94,000 prices from 23,000 retail and service establishments across 75 urban areas.",
+    "data_points": 62
+  }
+}`} lang="json" title="data type_data" />
+
+## Time range schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `start` | `string` (ISO 8601 date) | Start of the time range |
+| `end` | `string` (ISO 8601 date) | End of the time range |
+
+## Notes
+
+- `dataset_name` should be the canonical name of the dataset, not a page title or description.
+- `instrument` describes how the data was collected, not the platform hosting it.
+- `frequency` uses human-readable terms: `"real-time"`, `"daily"`, `"weekly"`, `"monthly"`, `"quarterly"`, `"annual"`, `"one-time"`.
+- `data_points` is an approximate count when exact counts are not available.
+- For financial data pages, `entities` should include the companies or instruments covered, and `claims` should capture key numerical assertions.
+- For scientific data, `methodology` should summarize the experimental design or measurement protocol.

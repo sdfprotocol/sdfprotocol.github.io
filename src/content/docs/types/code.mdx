@@ -1,0 +1,62 @@
+---
+title: "code"
+description: "SDF type reference for code — software repositories, packages, and code content. Subtypes: repository, package, snippet, gist, notebook, documentation."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Overview
+
+The `code` parent type covers software-related content including repositories, package registries, code snippets, gists, notebooks, and code documentation. It captures the metadata developers and agents need to evaluate, compare, and use software.
+
+## Subtypes
+
+| Subtype | Qualified Type | Description |
+|---------|---------------|-------------|
+| `repository` | `code.repository` | Source code repository (e.g., GitHub repo) |
+| `package` | `code.package` | Package registry listing (e.g., npm, PyPI) |
+| `snippet` | `code.snippet` | Code snippet or example |
+| `gist` | `code.gist` | Gist or short code share |
+| `notebook` | `code.notebook` | Jupyter or computational notebook |
+| `documentation` | `code.documentation` | Code-level documentation (e.g., JSDoc, Rustdoc) |
+
+## type_data fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `repository` | `string` | Yes | Repository or package name |
+| `language` | `string` | No | Primary programming language |
+| `license` | `string` | No | License identifier (SPDX format preferred) |
+| `stars` | `integer` | No | Star or favorite count |
+| `forks` | `integer` | No | Fork count |
+| `dependencies` | `array<string>` | No | Key dependencies |
+| `package_manager` | `string` | No | Package manager (npm, pip, cargo, etc.) |
+
+## Example type_data
+
+<Code code={`{
+  "type_data": {
+    "repository": "vercel/next.js",
+    "language": "TypeScript",
+    "license": "MIT",
+    "stars": 128400,
+    "forks": 27200,
+    "dependencies": [
+      "react",
+      "react-dom",
+      "webpack",
+      "turbopack",
+      "swc"
+    ],
+    "package_manager": "npm"
+  }
+}`} lang="json" title="code type_data" />
+
+## Notes
+
+- `repository` should use the `owner/repo` format for repositories, or the package name for package listings.
+- `language` is the primary language. Multi-language projects should list the dominant language here; secondary languages can be captured in `entities` or `sections`.
+- `license` should use [SPDX identifiers](https://spdx.org/licenses/) where possible (e.g., `"MIT"`, `"Apache-2.0"`, `"GPL-3.0-only"`).
+- `stars` and `forks` are point-in-time counts from when the page was fetched. Use `source.fetch_timestamp` to determine currency.
+- `dependencies` lists key dependencies, not the complete dependency tree. The intent is to give agents a quick signal about the project's ecosystem.
+- For code documentation that also serves as API reference, use `aspects: ["documentation.api_reference"]`.

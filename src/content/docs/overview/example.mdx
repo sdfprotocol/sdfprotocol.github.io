@@ -1,0 +1,136 @@
+---
+title: Quick Example
+description: A minimal SDF document showing what an AI agent receives instead of raw HTML.
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## What an agent receives
+
+Instead of parsing 89 KB of raw HTML, an AI agent receives a structured JSON document like this. The example below represents a news article — approximately **750 tokens** compared to **~73,000 tokens** for the original HTML.
+
+<Code code={`{
+  "sdf_version": "0.2.0",
+  "id": "sdf_a1b2c3d4e5f6",
+  "parent_type": "article",
+  "type": "article.news",
+  "source": {
+    "url": "https://example.com/ai-regulation-2025",
+    "domain": "example.com",
+    "fetch_timestamp": "2025-03-15T14:30:00Z",
+    "http_status": 200,
+    "content_type": "text/html",
+    "language": "en"
+  },
+  "summary": {
+    "one_line": "EU passes comprehensive AI regulation framework effective 2026.",
+    "key_points": [
+      "Framework covers all general-purpose AI systems above 10B parameters",
+      "Mandatory risk assessments for high-stakes deployments",
+      "Fines up to 7% of global annual revenue for non-compliance",
+      "18-month implementation window for existing systems"
+    ],
+    "abstract": "The European Union adopted a binding regulation on artificial intelligence systems, establishing tiered compliance requirements based on model capability and deployment risk. The regulation introduces mandatory transparency reports, external auditing for high-risk applications, and a centralized EU AI registry."
+  },
+  "entities": [
+    {
+      "name": "European Union",
+      "type": "organization",
+      "role": "regulator",
+      "salience": 0.95
+    },
+    {
+      "name": "AI Act",
+      "type": "legislation",
+      "role": "subject",
+      "salience": 0.92
+    },
+    {
+      "name": "Thierry Breton",
+      "type": "person",
+      "role": "quoted_source",
+      "salience": 0.61
+    }
+  ],
+  "claims": [
+    {
+      "claim": "AI systems above 10B parameters require mandatory risk assessments",
+      "source_type": "direct",
+      "confidence": 0.94,
+      "supporting_entities": ["AI Act", "European Union"]
+    },
+    {
+      "claim": "Non-compliance fines can reach 7% of global annual revenue",
+      "source_type": "direct",
+      "confidence": 0.97,
+      "supporting_entities": ["AI Act"]
+    }
+  ],
+  "topics": ["artificial intelligence", "regulation", "European Union", "compliance"],
+  "relationships": [
+    {
+      "subject": "European Union",
+      "predicate": "enacted",
+      "object": "AI Act",
+      "confidence": 0.96
+    },
+    {
+      "subject": "AI Act",
+      "predicate": "regulates",
+      "object": "general-purpose AI systems",
+      "confidence": 0.93
+    }
+  ],
+  "type_data": {
+    "authors": ["Maria Schmidt"],
+    "byline": "Maria Schmidt, Brussels Correspondent",
+    "publish_date": "2025-03-15",
+    "section": "Technology Policy",
+    "word_count": 2847,
+    "reading_time": 12,
+    "sources": ["EU Parliament records", "Press conference transcript"]
+  },
+  "provenance": {
+    "converter": "sdf-pipeline",
+    "converter_version": "0.2.0",
+    "model": "sdf-extractor-3b",
+    "conversion_timestamp": "2025-03-15T15:02:30Z",
+    "conversion_confidence": 0.91,
+    "content_hash": "sha256:8a3b1c..."
+  }
+}`} lang="json" title="article.news — SDF Document" />
+
+## Anatomy of an SDF document
+
+### `source`
+Origin metadata: the URL, domain, fetch timestamp, HTTP status, and content language. Agents know exactly where this content came from and when it was retrieved.
+
+### `summary`
+Three levels of summarization: a one-line headline, key bullet points, and a paragraph-length abstract. Agents select the appropriate level of detail for their use case.
+
+### `entities`
+Named entities extracted from the content with type classification, role assignment, and salience scoring. Agents get a structured entity graph without running NER.
+
+### `claims`
+Factual assertions extracted from the content with source attribution and confidence scores. Agents can verify claims against supporting entities without re-reading the source text.
+
+### `relationships`
+Subject-predicate-object triples expressing relationships between entities. Agents consume a knowledge graph fragment directly.
+
+### `type_data`
+Type-specific fields determined by the `parent_type` and `type`. An `article.news` document includes authors, publish date, section, and word count. A `commerce.product` document would include price, availability, and specifications instead.
+
+### `provenance`
+Full audit trail: which converter produced this document, which model was used, when the conversion happened, the confidence score, and a content hash for deduplication.
+
+## Token efficiency
+
+| Representation | Size | Tokens (approx.) | Reduction |
+|---------------|------|-------------------|-----------|
+| Raw HTML | 89 KB | ~73,000 | — |
+| Markdown (cleaned) | 12 KB | ~4,200 | 94% |
+| **SDF JSON** | **2 KB** | **~750** | **99%** |
+
+The SDF representation preserves the semantic content — entities, claims, relationships, type-specific fields — while eliminating everything an agent does not need: layout markup, navigation, advertising, scripts, and boilerplate.
+
+This is what agents should receive instead of raw HTML.

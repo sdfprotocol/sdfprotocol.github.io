@@ -1,0 +1,72 @@
+---
+title: Why SDF?
+description: The problem SDF solves — redundant extraction, token waste, and inconsistency across AI agents consuming web content.
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## The redundancy problem
+
+Every AI agent that consumes a web page performs the same work independently:
+
+1. **Fetch** the raw HTML
+2. **Strip** boilerplate (nav, ads, scripts, footers)
+3. **Extract** the main content
+4. **Identify** entities, claims, and relationships
+5. **Classify** the content type
+6. **Structure** the result for downstream use
+
+When 100 agents consume the same page, this work happens 100 times. Each agent uses different heuristics, different models, and produces different results. There is no shared representation.
+
+## The cost of raw HTML
+
+| Metric | Raw HTML | SDF |
+|--------|----------|-----|
+| Avg. page size | 89 KB | ~2 KB |
+| Token count (LLM) | ~73,000 | ~750 |
+| Extraction required | Yes, every time | No — pre-extracted |
+| Schema validation | None | JSON Schema enforced |
+| Entity consistency | Varies by model | Canonical |
+| Cacheable | URL-level only | Content-hash verified |
+
+Raw HTML is a delivery format for browsers, not for agents. It contains navigation, advertising, tracking scripts, and layout markup that is irrelevant to semantic understanding. Feeding raw HTML to an LLM wastes context window, increases latency, and introduces extraction variance.
+
+## SDF as the compilation layer
+
+SDF occupies the same position in the agent stack that compiled bytecode occupies in a software stack. Source code (HTML) is authored by humans; compiled output (SDF) is consumed by machines.
+
+```
+HTML (source) → SDF Converter → SDF Document (compiled) → Agent (consumer)
+```
+
+The conversion happens **once** at the publisher or intermediary level. Every downstream agent consumes the same canonical representation.
+
+## Comparison with alternatives
+
+| Approach | Structured | Semantic | Type-aware | Schema-validated | Agent-optimized |
+|----------|-----------|----------|------------|-----------------|----------------|
+| **Raw HTML** | No | No | No | No | No |
+| **Schema.org / JSON-LD** | Partial | Partial | Limited | Optional | No |
+| **RSS / Atom** | Minimal | No | No | DTD only | No |
+| **llms.txt** | No | No | No | No | Partial |
+| **RAG pipelines** | Varies | Varies | No | No | Partial |
+| **SDF** | Yes | Yes | Yes (50+ types) | Yes (JSON Schema) | Yes |
+
+**Schema.org** provides vocabulary but not document structure. A page may have JSON-LD markup for an `Article`, but the actual content — entities, claims, relationships — is still locked in HTML.
+
+**RSS/Atom** provides syndication metadata (title, date, summary) but not semantic extraction.
+
+**llms.txt** provides a plain-text rendering hint but no structured fields, no schema, and no type system.
+
+**RAG pipelines** chunk and embed content for retrieval but discard document structure and type semantics in the process.
+
+SDF provides the complete package: a schema-validated, type-aware, semantically extracted JSON document that agents consume without further processing.
+
+<CardGrid>
+  <Card title="Read the Spec" icon="right-arrow">
+    See the full [Protocol v0.2 specification](/spec/protocol/).
+  </Card>
+  <Card title="View Research" icon="open-book">
+    Review the [production findings](/research/findings/) from 2,335 documents.
+  </Card>
+</CardGrid>

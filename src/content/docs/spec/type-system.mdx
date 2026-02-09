@@ -1,0 +1,128 @@
+---
+title: Type System
+description: "SDF's hierarchical two-level type system — 10 parent types, 50+ subtypes, aspects, and normalization."
+---
+
+import { Code, Badge } from '@astrojs/starlight/components';
+
+## Hierarchical classification
+
+SDF uses a two-level type system: `parent_type.type`. The `parent_type` is one of 10 top-level categories. The `type` field provides finer-grained classification as `parent_type.subtype`.
+
+```
+parent_type: "article"
+type:        "article.news"
+```
+
+The parent type determines which `type_data` schema applies to the document. The subtype provides additional classification within that schema.
+
+## Parent types and subtypes
+
+### `article`
+Content produced by an author for publication.
+
+Subtypes: `news`, `blog`, `opinion`, `review`, `analysis`, `press_release`
+
+### `documentation`
+Technical or instructional content for a product, API, or platform.
+
+Subtypes: `tutorial`, `api_reference`, `guide`, `faq`, `changelog`, `troubleshooting`
+
+### `commerce`
+Product or service listings and transactional content.
+
+Subtypes: `product`, `category`, `comparison`, `marketplace`, `service`, `pricing`
+
+### `discussion`
+Community-generated Q&A and forum content.
+
+Subtypes: `forum`, `qa`, `comment_thread`, `review_thread`, `poll`
+
+### `reference`
+Encyclopedic and reference material.
+
+Subtypes: `encyclopedia`, `dictionary`, `legal`, `academic`, `specification`, `wiki`
+
+### `data`
+Data-centric content: datasets, statistics, reports.
+
+Subtypes: `dataset`, `statistics`, `report`, `dashboard`, `financial`, `scientific`
+
+### `code`
+Software repositories, packages, and code-related content.
+
+Subtypes: `repository`, `package`, `snippet`, `gist`, `notebook`, `documentation`
+
+### `profile`
+Entity profiles: people, organizations, places.
+
+Subtypes: `person`, `organization`, `place`, `product_profile`, `portfolio`
+
+### `event`
+Event listings and schedules.
+
+Subtypes: `conference`, `meetup`, `webinar`, `concert`, `sports`, `workshop`
+
+### `media`
+Audio, video, and multimedia content.
+
+Subtypes: `video`, `podcast`, `music`, `image_gallery`, `livestream`, `animation`
+
+## Complete taxonomy table
+
+| Parent Type | Subtypes | Description |
+|------------|----------|-------------|
+| `article` | news, blog, opinion, review, analysis, press_release | Authored content for publication |
+| `documentation` | tutorial, api_reference, guide, faq, changelog, troubleshooting | Technical and instructional content |
+| `commerce` | product, category, comparison, marketplace, service, pricing | Product/service listings |
+| `discussion` | forum, qa, comment_thread, review_thread, poll | Community Q&A and forums |
+| `reference` | encyclopedia, dictionary, legal, academic, specification, wiki | Encyclopedic / reference material |
+| `data` | dataset, statistics, report, dashboard, financial, scientific | Data-centric content |
+| `code` | repository, package, snippet, gist, notebook, documentation | Software and code content |
+| `profile` | person, organization, place, product_profile, portfolio | Entity profiles |
+| `event` | conference, meetup, webinar, concert, sports, workshop | Event listings |
+| `media` | video, podcast, music, image_gallery, livestream, animation | Audio/video/multimedia |
+
+## Aspects
+
+Some content spans multiple types. A product review is both `article.review` and `commerce.product`. The `aspects` field captures secondary type classifications:
+
+```json
+{
+  "parent_type": "article",
+  "type": "article.review",
+  "aspects": ["commerce.product"]
+}
+```
+
+Aspects do not change the `type_data` schema — the primary `parent_type` determines that. They provide additional classification signals for agents that need multi-dimensional type filtering.
+
+## Type normalization cascade
+
+LLM-based extraction often produces non-standard type values. The SDF pipeline applies a 5-stage normalization cascade to ensure all documents conform to the canonical taxonomy:
+
+### Stage 1: Exact match
+If the extracted type exactly matches a canonical type, accept it.
+
+### Stage 2: Alias resolution
+Map known aliases to canonical types:
+- `"blog_post"` → `"article.blog"`
+- `"product_page"` → `"commerce.product"`
+- `"q_and_a"` → `"discussion.qa"`
+
+### Stage 3: Parent type inference
+If only a parent type is provided, infer the most likely subtype based on content signals:
+- `"article"` + news domain → `"article.news"`
+- `"code"` + GitHub URL → `"code.repository"`
+
+### Stage 4: Fuzzy matching
+Apply string similarity matching against the canonical taxonomy:
+- `"artcle.news"` → `"article.news"` (edit distance 1)
+- `"documentation.api"` → `"documentation.api_reference"` (prefix match)
+
+### Stage 5: Fallback classification
+If all previous stages fail, re-classify using content-based heuristics and assign the closest canonical type.
+
+In production deployment across 2,335 documents, 63 invented type combinations were corrected by the normalization cascade, achieving 100% conformance to the canonical taxonomy.
+
+See [Type Taxonomy](/types/taxonomy/) for the full reference with production statistics.

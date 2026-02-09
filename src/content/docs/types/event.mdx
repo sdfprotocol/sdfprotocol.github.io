@@ -1,0 +1,92 @@
+---
+title: "event"
+description: "SDF type reference for event — event listings and schedules. Subtypes: conference, meetup, webinar, concert, sports, workshop."
+---
+
+import { Code } from '@astrojs/starlight/components';
+
+## Overview
+
+The `event` parent type covers event listings, conference pages, meetup announcements, webinars, concerts, sports events, and workshops. It captures the structured event data that agents need for calendar integration, discovery, and recommendation.
+
+## Subtypes
+
+| Subtype | Qualified Type | Description |
+|---------|---------------|-------------|
+| `conference` | `event.conference` | Conference or summit |
+| `meetup` | `event.meetup` | Meetup or community gathering |
+| `webinar` | `event.webinar` | Online webinar or virtual event |
+| `concert` | `event.concert` | Concert or live music event |
+| `sports` | `event.sports` | Sports event or match |
+| `workshop` | `event.workshop` | Workshop or training session |
+
+## type_data fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `event_name` | `string` | Yes | Name of the event |
+| `start_date` | `string` (ISO 8601) | Yes | Event start date/time |
+| `end_date` | `string` (ISO 8601) | No | Event end date/time |
+| `location` | `object` | No | Event location |
+| `organizer` | `string` | No | Event organizer name |
+| `speakers` | `array<string>` | No | Featured speakers or performers |
+| `registration_url` | `string` | No | URL for event registration |
+| `price` | `object` | No | Ticket or attendance pricing |
+
+## Example type_data
+
+<Code code={`{
+  "type_data": {
+    "event_name": "NeurIPS 2025",
+    "start_date": "2025-12-09T09:00:00-08:00",
+    "end_date": "2025-12-15T18:00:00-08:00",
+    "location": {
+      "venue": "Vancouver Convention Centre",
+      "city": "Vancouver",
+      "country": "CA",
+      "virtual": false
+    },
+    "organizer": "Neural Information Processing Systems Foundation",
+    "speakers": [
+      "Yann LeCun",
+      "Demis Hassabis",
+      "Daphne Koller"
+    ],
+    "registration_url": "https://neurips.cc/Register",
+    "price": {
+      "amount": 850.00,
+      "currency": "USD",
+      "tiers": [
+        { "name": "Student", "amount": 250.00 },
+        { "name": "Academic", "amount": 550.00 },
+        { "name": "Industry", "amount": 850.00 }
+      ]
+    }
+  }
+}`} lang="json" title="event type_data" />
+
+## Location schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `venue` | `string` | Venue name |
+| `city` | `string` | City name |
+| `country` | `string` | ISO 3166-1 alpha-2 country code |
+| `virtual` | `boolean` | Whether the event is virtual or hybrid |
+
+## Price schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `amount` | `number` | Base price |
+| `currency` | `string` | ISO 4217 currency code |
+| `tiers` | `array<object>` | Pricing tiers if multiple options exist |
+
+## Notes
+
+- `start_date` and `end_date` should include timezone information. Use full ISO 8601 format with offset.
+- `location.country` uses ISO 3166-1 alpha-2 codes (e.g., `"US"`, `"CA"`, `"GB"`).
+- For hybrid events, set `location.virtual` to `true` and include the physical venue details.
+- `speakers` lists keynote or featured speakers, not all presenters. The full speaker list can be in `sections`.
+- `price` captures the registration or ticket price. For free events, omit the field or set `amount` to `0`.
+- For recurring events, each occurrence should be a separate SDF document.
