@@ -38,6 +38,8 @@ export default defineConfig({
             { label: "What is SDF?", slug: "" },
             { label: "Why SDF?", slug: "overview/why" },
             { label: "Quick Example", slug: "overview/example" },
+            { label: "Scope & Non-Goals", slug: "about/scope" },
+            { label: "Governance", slug: "about/governance" },
           ],
         },
         {

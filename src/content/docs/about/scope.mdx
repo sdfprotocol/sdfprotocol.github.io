@@ -1,0 +1,54 @@
+---
+title: Scope & Non-Goals
+description: "What SDF is — and explicitly what it is not."
+---
+
+## What SDF is
+
+SDF is a **data interchange format**. It defines how to represent pre-extracted semantic content from web pages as structured JSON so that any consumer — AI agent, search engine, analytics pipeline, or application — can read it without re-parsing the original source.
+
+Specifically, SDF defines:
+
+- A **document schema** with required and optional fields
+- A **hierarchical type system** (10 parent types, 50+ subtypes) that determines which structured fields apply
+- **Provenance metadata** so consumers know how and when a document was produced
+- **Content negotiation** for serving different resolution levels (compact, standard, full)
+- **Discovery mechanisms** (`/.well-known/sdf.json`) so agents can find SDF endpoints
+
+## What SDF is NOT
+
+These boundaries are intentional and will not change in future protocol versions.
+
+### Not an agent framework
+
+SDF contains no agent instructions, tool definitions, function calls, or execution semantics. It does not tell agents what to do — it gives them structured data to reason about. How an agent uses SDF is entirely outside the protocol's scope.
+
+### Not a UI specification
+
+SDF documents contain no layout hints, rendering instructions, CSS classes, or display metadata. SDF is machine-first by design. If you need to render content for humans, use the original HTML.
+
+### Not a replacement for HTML
+
+SDF is a **complementary layer**, not a competitor to HTML, RSS, Atom, or any existing web standard. Publishers continue to serve HTML to browsers. SDF serves the same content in a pre-extracted, machine-optimized form alongside it.
+
+### Not a business logic layer
+
+SDF does not encode pricing rules, access control, rate limits, authentication, or API behavior. These are transport-layer concerns handled by the server, not the document format.
+
+### Not a model specification
+
+SDF does not require any particular LLM, embedding model, or NLP pipeline. The protocol is model-agnostic. Any system capable of producing valid SDF JSON — whether an LLM, a rule-based extractor, or a human — can be an SDF converter.
+
+### Not a proprietary format
+
+SDF Core will never contain vendor-specific fields, required proprietary extensions, or features that only work with a particular provider's tooling. The `extensions` namespace exists for vendor-specific additions, but Core remains neutral.
+
+## Design principles
+
+| Principle | Implication |
+|-----------|------------|
+| **Machine-first** | Every design decision optimizes for programmatic consumption, not human reading |
+| **Schema-validated** | If it doesn't pass JSON Schema validation, it's not SDF |
+| **Transport-agnostic** | SDF is a JSON payload; how you deliver it (HTTP, file, message queue) is orthogonal |
+| **Model-agnostic** | No assumption about which LLM or extractor produces the document |
+| **Minimal Core** | New fields require clear justification; the default answer to "should we add X?" is no |

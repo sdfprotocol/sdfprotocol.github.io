@@ -1,0 +1,72 @@
+---
+title: Governance
+description: "How SDF is developed, versioned, and governed."
+---
+
+## Open protocol commitment
+
+SDF is an open protocol. The specification, JSON schemas, and reference implementation are publicly available under permissive open-source licenses. This will not change.
+
+## Core promises
+
+### The spec is always open
+
+The SDF protocol specification will always be freely available to read, implement, and redistribute. No registration, license fee, or approval is required to build software that produces or consumes SDF documents.
+
+### Backwards compatibility
+
+Once a protocol version reaches **stable** status:
+
+- No existing required fields will be removed
+- No existing field semantics will change
+- New optional fields may be added
+- Deprecated fields will be retained for at least one major version
+
+The current version (v0.2) is in **draft** status. Breaking changes may occur between minor versions until v1.0. After v1.0, the backwards compatibility policy takes full effect.
+
+### No proprietary extensions in Core
+
+The SDF Core schema will never require proprietary fields or vendor-specific features. The `extensions` namespace allows vendors to add custom fields using reverse-domain notation (e.g., `com.example.custom_field`), but Core fields remain vendor-neutral.
+
+### Type system stability
+
+Once a parent type is added to the taxonomy, it will not be removed. Subtypes may be added, but existing subtypes will not be renamed or removed after v1.0.
+
+## Versioning
+
+SDF uses [Semantic Versioning](https://semver.org/):
+
+| Component | Meaning |
+|-----------|---------|
+| **Major** (e.g., 1.x → 2.x) | Breaking changes to required fields or semantics |
+| **Minor** (e.g., 0.2 → 0.3) | New optional fields, new types, non-breaking additions |
+| **Patch** (e.g., 0.2.0 → 0.2.1) | Schema fixes, documentation clarifications |
+
+Every SDF document declares its protocol version via the `sdf_version` field. Consumers can check this field to determine which schema to validate against.
+
+## Contributing
+
+SDF is developed in the open on GitHub:
+
+- **Specification & schemas**: [github.com/sdfprotocol](https://github.com/sdfprotocol)
+- **Issues and proposals**: Use GitHub Issues for bug reports, feature requests, and spec discussions
+- **Pull requests**: Contributions to the specification, schemas, and documentation are welcome
+
+### Proposing changes
+
+For non-trivial changes (new fields, new types, semantic modifications):
+
+1. Open a GitHub Issue describing the motivation and proposed change
+2. Discussion happens in the issue thread
+3. If consensus is reached, submit a pull request with the spec and schema changes
+4. Changes are reviewed and merged by the maintainers
+
+## Current status
+
+| Item | Status |
+|------|--------|
+| Protocol version | v0.2.0 (draft) |
+| JSON Schema | Published |
+| Reference implementation | Available |
+| Governance model | Maintainer-led, open contribution |
+| Target for v1.0 stable | Under evaluation |
