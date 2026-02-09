@@ -81,6 +81,7 @@ export default defineConfig({
           items: [
             { label: "Key Findings", slug: "research/findings" },
             { label: "Downstream Evaluation", slug: "research/downstream" },
+            { label: "Whitepaper (PDF)", link: "/whitepaper.pdf" },
           ],
         },
       ],
