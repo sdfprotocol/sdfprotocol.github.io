@@ -18,7 +18,7 @@ export default defineConfig({
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/nicholasgriffintn/sdf",
+          href: "https://github.com/sdfprotocol",
         },
       ],
       customCss: ["./src/styles/custom.css"],
