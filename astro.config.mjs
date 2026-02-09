@@ -81,15 +81,6 @@ export default defineConfig({
             { label: "Downstream Evaluation", slug: "research/downstream" },
           ],
         },
-        {
-          label: "Links",
-          items: [
-            {
-              label: "sdfprotocol.com (API & SDK)",
-              link: "https://sdfprotocol.com",
-            },
-          ],
-        },
       ],
     }),
   ],
